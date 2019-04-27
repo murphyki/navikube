@@ -1,6 +1,6 @@
 # navikube
 
-> `navikube` is an intuitive front-end desktop application for navigating kubernetes resources and exploring their details.
+> `navikube` is an intuitive front-end desktop application for navigating [kubernetes](https://kubernetes.io/) resources and exploring their details.
 
 ## Overview
 `navikube` is buit using the awesome [electron](https://electronjs.org/) and [Vue.js](https://vuejs.org/) frameworks.
@@ -8,6 +8,18 @@
 To make life even easier, `navikube` was scaffolded using the [electron-vue](https://github.com/SimulatedGREG/electron-vue) project and uses the [ElementUI](https://element.eleme.io/?ref=madewithvuejs.com#/en-US) component library.
 
 `navikube` uses the kubernetes REST API to communicate with the kubernetes server courtesy of the [Javascript clients for Kubernetes](https://github.com/kubernetes-client/javascript).
+
+`navikube` currently explores the following kubernetes resources:
+- Nodes
+- Pods
+- Deployments
+- Services
+- Secrets
+- ConfigMaps
+
+`navikube` also currently explores the following [istio](https://istio.io/) resources:
+- VirtualServices
+- ServiceEntries
 
 > Because `navikube` is built on electron, `navikube` should be cross-platform, but so far I have only built and tested on Linux (Ubuntu 18.04.1 LTS)
 

@@ -54,87 +54,126 @@
 
   export default {
     data () {
-      return {
-        resourceData: [],
-        resource: 'pods',
-        resources: [
-            {label: 'pods', value: 'pods'},
-            {label: 'deployments', value: 'deployments'},
-            {label: 'secrets', value: 'secrets'},
-            {label: 'virtualservices', value: 'virtualservices'},
-            {label: 'serviceentries', value: 'serviceentries'},
-            {label: 'nodes', value: 'nodes'},
-        ],
-        namespace: 'all',
-        namespaces: []
-      }
+        return {
+            namespace: 'all',
+            namespaces: [],
+            resourceData: [],
+            resource: 'nodes',
+            resources: [
+                {label: 'nodes', value: 'nodes'},
+                {label: 'pods', value: 'pods'},
+                {label: 'deployments', value: 'deployments'},
+                {label: 'services', value: 'services'},
+                {label: 'secrets', value: 'secrets'},
+                {label: 'configmaps', value: 'configmaps'},
+                {label: 'virtualservices', value: 'virtualservices'},
+                {label: 'serviceentries', value: 'serviceentries'}
+            ]
+        }
     },
     mounted() {
-        this.loadNamespaces();
+        this.loadNamespaces().then(() => {
+            this.loadResources();
+        });
     },
     methods: {
         loadResources: function() {
-            let url = this.formatUrl();
-
-            request.get(url, this.$kc_opts, (error, response, body) => {
-                if (error) {
-                    console.log(`error: ${error}`);
-                }
-                if (response) {
-                    console.log(`statusCode: ${response.statusCode}`);
-                }
-
-                this.resourceData = []
-                if (response.statusCode == 200) {
-                    let items = JSON.parse(body).items;
-                    for (let item in items) {
-                        items[item].metadata.formatYAML = true;
-                        items[item].metadata.resourceDetails = '';
-                        this.resourceData.push(items[item].metadata);
+            return new Promise((resolve, reject) => {
+                let url = this.formatUrl();
+                request.get(url, this.$kc_opts, (error, response, body) => {
+                    if (error) {
+                        this.handleGeneralError(error);
+                        return reject(error);
                     }
-                }
-                console.log('resourceData:', this.resourceData);
+
+                    if (response.statusCode != 200) {
+                        this.handleApiError(response, body);
+                        return reject('API Request failed');
+                    }
+
+                    this.resourceData = []
+                    try {
+                        let items = JSON.parse(body).items;
+                        for (let item in items) {
+                            items[item].metadata.formatYAML = true;
+                            items[item].metadata.resourceDetails = '';
+                            this.resourceData.push(items[item].metadata);
+                        }
+                    } catch(ex) {
+                        this.handleException(ex);
+                        return reject(ex);
+                    }
+
+                    console.log('resourceData:', this.resourceData);
+                    return resolve(this.resourceData);
+                });
             });
         },
-        loadResource: function(resource) {
-            console.log('Selected resource:', resource);
-            let url = `${this.$kc.getCurrentCluster().server}${resource.selfLink}`
+        loadResource: function(resource, expandedRows) {
+            console.log('resource:', resource);
+            console.log('expandedRows:', expandedRows);
 
-            request.get(url, this.$kc_opts, (error, response, body) => {
-                if (error) {
-                    console.log(`error: ${error}`);
-                }
-                if (response) {
-                    console.log(`statusCode: ${response.statusCode}`);
-                }
+            if (expandedRows && expandedRows.length == 0) {
+                return;
+            }
 
-                if(resource.formatYAML) {
-                    resource.resourceDetails = YAML.stringify(JSON.parse(body));
-                } else {
-                    resource.resourceDetails = JSON.stringify(JSON.parse(body), null, 2);
-                }
-                console.log('resourceDetails:', resource.resourceDetails);
+            return new Promise((resolve, reject) => {
+                let url = `${this.$kc.getCurrentCluster().server}${resource.selfLink}`
+                request.get(url, this.$kc_opts, (error, response, body) => {
+                    if (error) {
+                        this.handleGeneralError(error);
+                        return reject(error);
+                    }
+
+                    if (response.statusCode != 200) {
+                        this.handleApiError(response, body);
+                        return reject('API Request failed');
+                    }
+
+                    try {
+                        if(resource.formatYAML) {
+                            resource.resourceDetails = YAML.stringify(JSON.parse(body));
+                        } else {
+                            resource.resourceDetails = JSON.stringify(JSON.parse(body), null, 2);
+                        }
+                    } catch(ex) {
+                        this.handleException(ex);
+                        return reject(ex);
+                    }
+
+                    console.log('resourceDetails:', resource.resourceDetails);
+                    return resolve(resource.resourceDetails);
+                });
             });
         },
         loadNamespaces: function() {
-            let url = `${this.$kc.getCurrentCluster().server}/api/v1/namespaces`
-
-            request.get(url, this.$kc_opts, (error, response, body) => {
-                if (error) {
-                    console.log(`error: ${error}`);
-                }
-                if (response) {
-                    console.log(`statusCode: ${response.statusCode}`);
-                }
-
-                this.namespaces = [{label: 'all', value: 'all'}];
-                if (response.statusCode == 200) {
-                    let items = JSON.parse(body).items;
-                    for (let item in items) {
-                        this.namespaces.push({'label': items[item].metadata.name, 'value': items[item].metadata.name});
+            return new Promise((resolve, reject) => {
+                let url = `${this.$kc.getCurrentCluster().server}/api/v1/namespaces`
+                request.get(url, this.$kc_opts, (error, response, body) => {
+                    if (error) {
+                        this.handleGeneralError(error);
+                        return reject(error);
                     }
-                }
-                console.log('namespaces:', this.namespaces);
+
+                    if (response.statusCode != 200) {
+                        this.handleApiError(response, body)
+                        return reject('API Request failed');
+                    }
+
+                    this.namespaces = [{label: 'all', value: 'all'}];
+                    try {
+                        let items = JSON.parse(body).items;
+                        for (let item in items) {
+                            this.namespaces.push({'label': items[item].metadata.name, 'value': items[item].metadata.name});
+                        }
+                    } catch(ex) {
+                        this.handleException(ex);
+                        return reject(ex);
+                    }
+
+                    console.log('namespaces:', this.namespaces);
+                    return resolve(this.namespaces);
+                });
             });
         },
         formatUrl() {
@@ -148,13 +187,52 @@
                 url = `${url}/api/v1`;
             }
 
-            if(this.namespace == 'all') {
+            if (this.namespace == 'all') {
                 url = `${url}/${this.resource}`;
             } else {
                 url = `${url}/namespaces/${this.namespace}/${this.resource}`;
             }
+
             console.log(`url: ${url}`);
             return url;
+        },
+        adaptResources() {
+        },
+        handleGeneralError(error) {
+            console.log(`error: ${error}`);
+            this.$notify({
+                title: 'An error ocurred',
+                message: `${error}`,
+                type: 'error',
+                duration: 0
+            });
+        },
+        handleApiError(response, reason) {
+            console.log(`response: ${response}`);
+            console.log(`reason: ${reason}`);
+
+            let details = {};
+            try {
+                details = JSON.parse(reason);
+            } catch(ex) {
+                this.handleException(ex);
+                details.message = 'Error parsing API response body';
+            }
+            this.$notify({
+                title: `Error ${response.statusCode}`,
+                message: `${details.message}`,
+                type: 'error',
+                duration: 0
+            });
+        },
+        handleException(ex) {
+            console.log(`exception: ${ex}`);
+            this.$notify({
+                title: 'An error ocurred',
+                message: `${ex}`,
+                type: 'error',
+                duration: 0
+            });
         }
     }
   }
