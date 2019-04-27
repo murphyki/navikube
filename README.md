@@ -1,8 +1,17 @@
 # navikube
 
-> An electron-vue project
+> `navikube` is an intuitive front-end desktop application for navigating kubernetes resources and exploring their details.
 
-#### Build Setup
+## Overview
+`navikube` is buit using the awesome [electron](https://electronjs.org/) and [Vue.js](https://vuejs.org/) frameworks.
+
+To make life even easier, `navikube` was scaffolded using the [electron-vue](https://github.com/SimulatedGREG/electron-vue) project and uses the [ElementUI](https://element.eleme.io/?ref=madewithvuejs.com#/en-US) component library.
+
+`navikube` uses the kubernetes REST API to communicate with the kubernetes server courtesy of the [Javascript clients for Kubernetes](https://github.com/kubernetes-client/javascript).
+
+> Because `navikube` is built on electron, `navikube` should be cross-platform, but so far I have only built and tested on Linux (Ubuntu 18.04.1 LTS)
+
+## Build Setup
 
 ``` bash
 # install dependencies
