@@ -20,7 +20,7 @@
                 </el-select>
             </el-header>
             <el-main>
-                <el-table :data="resourceData" empty-text="Nothing to show..." stripe @expand-change="loadResource">
+                <el-table :data="resourceData" empty-text="Nothing to show..." stripe @expand-change="loadResource" v-loading="tableLoading">
                     <el-table-column type="expand">
                         <template slot-scope="props">
                             <el-switch
@@ -34,7 +34,8 @@
                                 type="textarea"
                                 :rows="2"
                                 autosize
-                                v-model="props.row.resourceDetails">
+                                v-model="props.row.resourceDetails"
+                                v-loading="rowLoading">
                             </el-input>
                         </template>
                     </el-table-column>
@@ -68,7 +69,9 @@
                 {label: 'configmaps', value: 'configmaps'},
                 {label: 'virtualservices', value: 'virtualservices'},
                 {label: 'serviceentries', value: 'serviceentries'}
-            ]
+            ],
+            tableLoading: false,
+            rowLoading: false
         }
     },
     mounted() {
@@ -79,19 +82,22 @@
     methods: {
         loadResources: function() {
             return new Promise((resolve, reject) => {
+                this.resourceData = []
+                this.tableLoading = true;
                 let url = this.formatUrl();
                 request.get(url, this.$kc_opts, (error, response, body) => {
                     if (error) {
+                        this.tableLoading = false;
                         this.handleGeneralError(error);
                         return reject(error);
                     }
 
                     if (response.statusCode != 200) {
+                        this.tableLoading = false;
                         this.handleApiError(response, body);
                         return reject('API Request failed');
                     }
 
-                    this.resourceData = []
                     try {
                         let items = JSON.parse(body).items;
                         for (let item in items) {
@@ -100,10 +106,12 @@
                             this.resourceData.push(items[item].metadata);
                         }
                     } catch(ex) {
+                        this.tableLoading = false;
                         this.handleException(ex);
                         return reject(ex);
                     }
 
+                    this.tableLoading = false;
                     console.log('resourceData:', this.resourceData);
                     return resolve(this.resourceData);
                 });
@@ -118,14 +126,18 @@
             }
 
             return new Promise((resolve, reject) => {
+                resource.resourceDetails = '';
+                this.rowLoading = true;
                 let url = `${this.$kc.getCurrentCluster().server}${resource.selfLink}`
                 request.get(url, this.$kc_opts, (error, response, body) => {
                     if (error) {
+                        this.rowLoading = false;
                         this.handleGeneralError(error);
                         return reject(error);
                     }
 
                     if (response.statusCode != 200) {
+                        this.rowLoading = false;
                         this.handleApiError(response, body);
                         return reject('API Request failed');
                     }
@@ -137,10 +149,12 @@
                             resource.resourceDetails = JSON.stringify(JSON.parse(body), null, 2);
                         }
                     } catch(ex) {
+                        this.rowLoading = false;
                         this.handleException(ex);
                         return reject(ex);
                     }
 
+                    this.rowLoading = false;
                     console.log('resourceDetails:', resource.resourceDetails);
                     return resolve(resource.resourceDetails);
                 });
