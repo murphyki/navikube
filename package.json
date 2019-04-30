@@ -1,8 +1,8 @@
 {
   "name": "navikube",
   "version": "0.0.1",
-  "author": "murphk24 <kierantmurphy@gmail.com>",
-  "description": "An electron-vue project",
+  "author": "Kieran murphy <kierantmurphy@gmail.com>",
+  "description": "An intuitive front-end desktop application for navigating kubernetes resources and exploring their details",
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -20,12 +20,13 @@
   },
   "build": {
     "productName": "navikube",
-    "appId": "com.example.yourapp",
+    "appId": "com.murphyki.navikube",
     "directories": {
       "output": "build"
     },
     "files": [
-      "dist/electron/**/*"
+      "dist/electron/**/*",
+      "build/icons/**/*"
     ],
     "dmg": {
       "contents": [
@@ -49,7 +50,7 @@
       "icon": "build/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons/linux"
     }
   },
   "dependencies": {
