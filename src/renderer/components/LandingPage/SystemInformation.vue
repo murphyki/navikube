@@ -62,11 +62,17 @@
             resource: 'nodes',
             resources: [
                 {label: 'nodes', value: 'nodes'},
+                {label: 'persistentvolumes', value: 'persistentvolumes'},
+                {label: 'persistentvolumeclaims', value: 'persistentvolumeclaims'},
                 {label: 'pods', value: 'pods'},
-                {label: 'deployments', value: 'deployments'},
                 {label: 'services', value: 'services'},
                 {label: 'secrets', value: 'secrets'},
                 {label: 'configmaps', value: 'configmaps'},
+                {label: 'serviceaccounts', value: 'serviceaccounts'},
+                {label: 'deployments', value: 'deployments'},
+                {label: 'replicasets', value: 'replicasets'},
+                {label: 'daemonsets', value: 'daemonsets'},
+                {label: 'statefulsets', value: 'statefulsets'},
                 {label: 'virtualservices', value: 'virtualservices'},
                 {label: 'serviceentries', value: 'serviceentries'}
             ],
@@ -195,8 +201,10 @@
 
             if (this.resource == 'virtualservices' || this.resource == 'serviceentries') {
                 url = `${url}/apis/networking.istio.io/v1alpha3`;
-            } else if(this.resource =='deployments') {
+            } else if(this.resource =='deployments' || this.resource =='replicasets' || this.resource =='daemonsets') {
                 url = `${url}/apis/extensions/v1beta1`;
+            } else if (this.resource =='statefulsets') {
+                url = `${url}/apis/apps/v1`;
             } else {
                 url = `${url}/api/v1`;
             }
