@@ -1,13 +1,13 @@
 <template>
-  <system-information></system-information>
+  <resource-details></resource-details>
 </template>
 
 <script>
-  import SystemInformation from './LandingPage/SystemInformation'
+  import ResourceDetails from './ResourceExplorer/ResourceDetails'
 
   export default {
-    name: 'landing-page',
-    components: { SystemInformation },
+    name: 'resource-explorer',
+    components: { ResourceDetails },
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
