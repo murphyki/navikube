@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.8.2",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "element-ui": "^2.8.1",
     "json2yaml": "^1.1.0",
     "vue": "^2.5.16",
